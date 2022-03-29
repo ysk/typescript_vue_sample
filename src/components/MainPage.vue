@@ -1,18 +1,15 @@
 <template>
   <div class="main-page">
     <div class="left-menu">
-
-<!-- ノートリスト -->
-      <div class="note" v-for="note in noteList" v-bind:key="note.id">
-        <div class="note-icon">
-          <i class="fas fa-file-alt"></i>
-        </div>
-        <div class="note-name">{{note.name}}</div>
-      </div>
-
+      <!-- ノートリスト -->
+      <NoteItem 
+      v-for="note in noteList" 
+      :note="note" 
+      :key="note.id" 
+      />
       <button class="transparent" @click="onClickButtonAdd">
         <i class="fas fa-plus-square"></i>ノートを追加
-        </button>
+      </button>
     </div>
     <div class="right-view">
       右ビュー
@@ -21,19 +18,24 @@
 </template>
 
 <script>
+import NoteItem from '@/components/parts/NoteItem.vue'
+
 export default {
   data() {
     return {
-      noteList : [],
+      noteList: [],
     }
   },
   methods: {
     onClickButtonAdd : function() {
       this.noteList.push({
-        id : new Date().getTime().toString(16),
-        name : `新規ノート`,
-      })
+        id: new Date().getTime().toString(16),
+        name: `新規ノート`,
+      });
     },
+  },
+  components: {
+    NoteItem,
   },
 }
 </script>
