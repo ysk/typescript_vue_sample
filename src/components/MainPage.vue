@@ -1,17 +1,20 @@
 <template>
   <div class="main-page">
-    <div class="left-menu">
+    <div class="left-menu" @click.self="onEditNoteEnd()">
       <!-- ノートリスト -->
       <NoteItem 
-      v-for="note in noteList" 
-      :note="note" 
-      :key="note.id" 
+      v-for="_note in noteList" 
+      :note="_note" 
+      :key="_note.id" 
+      @delete="onDeleteNote"
+      @editStart="onEditNoteStart"
+      @editEnd="onEditNoteEnd"
       />
       <button class="transparent" @click="onClickButtonAdd">
         <i class="fas fa-plus-square"></i>ノートを追加
       </button>
     </div>
-    <div class="right-view">
+    <div clas="right-view" @click.self="onEditNoteEnd()">
       右ビュー
     </div>
   </div>
@@ -19,7 +22,6 @@
 
 <script>
 import NoteItem from '@/components/parts/NoteItem.vue'
-
 export default {
   data() {
     return {
@@ -27,12 +29,28 @@ export default {
     }
   },
   methods: {
-    onClickButtonAdd : function() {
+    onClickButtonAdd() {
       this.noteList.push({
         id: new Date().getTime().toString(16),
-        name: `新規ノート`,
+        name: '新規ノート',
+        mouseover: false,
+        editing: false,
       });
     },
+    onDeleteNote(deleteNote) {
+      const index = this.noteList.indexOf(deleteNote);
+      this.noteList.splice(index, 1);
+    },
+    onEditNoteStart(editNote) {
+      for(let note of this.noteList){
+        note.editing =(note.id === editNote.id)
+      }
+    },
+    onEditNoteEnd() {
+      for(let note of this.noteList){
+        note.editing = false;
+      }
+    }
   },
   components: {
     NoteItem,
