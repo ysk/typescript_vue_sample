@@ -2,15 +2,18 @@
   <div class="main-page">
     <div class="left-menu" @click.self="onEditNoteEnd()">
       <!-- ノートリスト -->
+      <draggable :list="noteList" group="notes">
       <NoteItem 
       v-for="note in noteList" 
       :note="note" 
-      :key="note.id" 
+      :key="note.id"
+      :layer="1"
       @delete="onDeleteNote"
       @editStart="onEditNoteStart"
       @editEnd="onEditNoteEnd"
       @addChild="onAddChildNote"
       />
+      </draggable>
       <button class="transparent" @click="onClickButtonAdd">
         <i class="fas fa-plus-square"></i>ノートを追加
       </button>
@@ -22,7 +25,9 @@
 </template>
 
 <script>
-import NoteItem from '@/components/parts/NoteItem.vue'
+import NoteItem from '@/components/parts/NoteItem.vue';
+import draggable from 'vuedraggable';
+
 export default {
   data() {
     return {
@@ -44,14 +49,18 @@ export default {
       const index = targetList.indexOf(note);
       targetList.splice(index, 1);
     },
-    onEditNoteStart(editNote) {
-      for(let note of this.noteList){
-        note.editing =(note.id === editNote.id);
+    onEditNoteStart(editNote, parentNote) {
+      const targetList = parentNote == null ? this.noteList : parentNote.children;
+      for (let note of targetList) {
+        note.editing = (note.id === editNote.id);
+        this.onEditNoteStart(editNote, note);
       }
     },
-    onEditNoteEnd() {
-      for(let note of this.noteList){
+    onEditNoteEnd(parentNote) {
+      const targetList = parentNote == null ? this.noteList : parentNote.children;
+      for (let note of targetList) {
         note.editing = false;
+        this.onEditNoteEnd(note);
       }
     },
     onAddChildNote(note) {
@@ -66,6 +75,7 @@ export default {
   },
   components: {
     NoteItem,
+    draggable,
   },
 }
 </script>

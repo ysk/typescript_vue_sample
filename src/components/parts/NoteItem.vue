@@ -14,7 +14,7 @@
       </div>
       <div class="note-name">{{note.name}}</div>
       <div v-show="note.mouseover" class="buttons">
-        <div class="button-icon" @click="onClickChildNote(note)">
+        <div class="button-icon" v-if="layer < 3" @click="onClickChildNote(note)">
           <i class="fas fa-sitemap"></i>
         </div>
         <div class="button-icon">
@@ -30,25 +30,31 @@
     </template>
   </div>
   <div class="child-note">
+    <draggable :list="note.children" group="notes">
     <NoteItem
       v-for="childNote in note.children"
-      v-bind:note="childNote"
-      v-bind:key="childNote.id"
-      v-bind:parentNote="note"
+      :note="childNote"
+      :key="childNote.id"
+      :parentNote="note"
+      :layer="layer + 1"
       @delete="onClickDelete"
       @editStart="onClickEdit"
       @editEnd="onEditEnd"
       @addChild="onClickChildNote"
     />
+    </draggable>
   </div>
 </div>
 </template>
 <script>
+import draggable from 'vuedraggable'
+
 export default {
   name: 'NoteItem',
   props: [
     'note',
     'parentNote',
+    'layer',
   ],
   methods:{
     onMouseOver(){
@@ -69,6 +75,9 @@ export default {
     onClickChildNote(note) {
       this.$emit('addChild', note);
     },
+  },
+  components: {
+    draggable,
   },
 }
 </script>
