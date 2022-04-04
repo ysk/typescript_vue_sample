@@ -3,12 +3,13 @@
     <div class="left-menu" @click.self="onEditNoteEnd()">
       <!-- ノートリスト -->
       <NoteItem 
-      v-for="_note in noteList" 
-      :note="_note" 
-      :key="_note.id" 
+      v-for="note in noteList" 
+      :note="note" 
+      :key="note.id" 
       @delete="onDeleteNote"
       @editStart="onEditNoteStart"
       @editEnd="onEditNoteEnd"
+      @addChild="onAddChildNote"
       />
       <button class="transparent" @click="onClickButtonAdd">
         <i class="fas fa-plus-square"></i>ノートを追加
@@ -35,21 +36,32 @@ export default {
         name: '新規ノート',
         mouseover: false,
         editing: false,
+        children: [],
       });
     },
-    onDeleteNote(deleteNote) {
-      const index = this.noteList.indexOf(deleteNote);
-      this.noteList.splice(index, 1);
+    onDeleteNote(parentNote, note) {
+      const targetList = parentNote == null ? this.noteList : parentNote.children;
+      const index = targetList.indexOf(note);
+      targetList.splice(index, 1);
     },
     onEditNoteStart(editNote) {
       for(let note of this.noteList){
-        note.editing =(note.id === editNote.id)
+        note.editing =(note.id === editNote.id);
       }
     },
     onEditNoteEnd() {
       for(let note of this.noteList){
         note.editing = false;
       }
+    },
+    onAddChildNote(note) {
+      note.children.push({
+        id: new Date().getTime().toString(16),
+        name: note.name + 'の子',
+        mouseover: false,
+        editing: false,
+        children: [],
+      });
     }
   },
   components: {
