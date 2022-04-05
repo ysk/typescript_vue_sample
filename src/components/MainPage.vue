@@ -9,6 +9,7 @@
       :key="note.id"
       :layer="1"
       @delete="onDeleteNote"
+      @select="onSelectNote"
       @editStart="onEditNoteStart"
       @editEnd="onEditNoteEnd"
       @addChild="onAddChildNote"
@@ -20,7 +21,17 @@
       </button>
     </div>
     <div clas="right-view" @click.self="onEditNoteEnd()">
-      右ビュー
+      <template v-if="selectedNote == null">
+        <div class="no-selected-note">ノートを選択してください</div>
+      </template>
+      <template v-else>
+        <div class="path">
+          <small>{{selectedPath}}</small>
+        </div>
+        <div class="note-content">
+          <h3 class="note-title">{{selectedNote.name}}</h3>
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -33,6 +44,7 @@ export default {
   data() {
     return {
       noteList: [],
+      selectedNote: null,
     }
   },
   methods: {
@@ -43,6 +55,7 @@ export default {
         name : `新規ノート-${layer}-${targetList.length}`,
         mouseover : false,
         editing : false,
+        selected: false,
         children : [],
         layer : layer,
       };
@@ -59,6 +72,19 @@ export default {
       const targetList = parentNote == null ? this.noteList : parentNote.children;
       const index = targetList.indexOf(note);
       targetList.splice(index, 1);
+    },
+      onSelectNote : function(targetNote) {
+      // 再帰的にノートの選択状態を更新
+      const updateSelectStatus = function(targetNote, noteList) {
+        for (let note of noteList) {
+          note.selected = (note.id === targetNote.id);
+          updateSelectStatus(targetNote, note.children);
+        }
+      }
+      updateSelectStatus(targetNote, this.noteList);
+      
+      // 選択中ノート情報を更新
+      this.selectedNote = targetNote;
     },
     onEditNoteStart(editNote, parentNote) {
       const targetList = parentNote == null ? this.noteList : parentNote.children;
@@ -82,6 +108,20 @@ export default {
       const layer = parentNote == null ? 1 : note.layer;
       const index = targetList.indexOf(note);
       this.onAddNoteCommon(targetList, layer, index);
+    },
+  },
+  computed: {
+    selectedPath : function() {
+      const searchSelectedPath = function(noteList, path) {
+        for (let note of noteList) {
+          const currentPath = path == null ? note.name : `${path} / ${note.name}`;
+          if (note.selected) return currentPath;
+          const selectedPath = searchSelectedPath(note.children, currentPath);
+          if (selectedPath.length > 0) return selectedPath;
+        }
+        return '';
+      }
+      return searchSelectedPath(this.noteList);
     },
   },
   components: {
@@ -116,6 +156,23 @@ export default {
   .right-view {
     flex-grow: 1;
     padding: 10px;
+    .no-selected-note {
+      text-align: center;
+      font-size: 25px;
+      margin: 20px;
+    }
+    .path {
+      text-align: left;
+      margin-bottom: 50px;      
+    }
+    .note-content {
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: left;
+      .note-title {
+        margin-bottom: 25px;
+      }
+    }
   }
 }
 </style>
