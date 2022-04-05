@@ -17,7 +17,7 @@
         <div class="button-icon" v-if="layer < 3" @click="onClickChildNote(note)">
           <i class="fas fa-sitemap"></i>
         </div>
-        <div class="button-icon">
+        <div class="button-icon" @click="onClickAddNoteAfter(parentNote, note)">
           <i class="fas fa-plus-circle"></i>
         </div>
         <div class="button-icon" @click="onClickEdit(note)">
@@ -41,6 +41,7 @@
       @editStart="onClickEdit"
       @editEnd="onEditEnd"
       @addChild="onClickChildNote"
+      @addNoteAfter="onClickAddNoteAfter"
     />
     </draggable>
   </div>
@@ -63,7 +64,7 @@ export default {
     onMouseLeave(){
       this.note.mouseover = false;
     },
-    onClickDelete(parentNote, note) {
+    onClickDelete(parentNote, note){
       this.$emit('delete', parentNote, note);
     },
     onClickEdit(note){
@@ -72,8 +73,11 @@ export default {
     onEditEnd(){
       this.$emit('editEnd');
     },
-    onClickChildNote(note) {
+    onClickChildNote(note){
       this.$emit('addChild', note);
+    },
+    onClickAddNoteAfter(parentNote, note){
+      this.$emit('addNoteAfter', parentNote, note);
     },
   },
   components: {
