@@ -20,7 +20,7 @@
         <i class="fas fa-plus-square"></i>ノートを追加
       </button>
     </div>
-    <div clas="right-view" @click.self="onEditNoteEnd()">
+    <div class="right-view" @click.self="onEditNoteEnd()">
       <template v-if="selectedNote == null">
         <div class="no-selected-note">ノートを選択してください</div>
       </template>
