@@ -30,6 +30,18 @@
         </div>
         <div class="note-content">
           <h3 class="note-title">{{selectedNote.name}}</h3>
+          <WidgetItem
+            v-for="widget in selectedNote.widgetList"
+            :widget="widget"
+            :layer="1"
+            :key="widget.id"
+            @delete="onDeleteWidget"
+            @addChild="onAddChildWidget"
+            @addWidgetAfter="onAddWidgetAfter"
+          />
+          <button class="transparent" @click="onClickButtonAddWidget">
+            <i class="fas fa-plus-square"></i>ウィジェットを追加
+          </button>
         </div>
       </template>
     </div>
@@ -38,6 +50,7 @@
 
 <script>
 import NoteItem from '@/components/parts/NoteItem.vue';
+import WidgetItem from '@/components/parts/WidgetItem.vue';
 import draggable from 'vuedraggable';
 
 export default {
@@ -53,12 +66,14 @@ export default {
       const note = {
         id : new Date().getTime().toString(16),
         name : `新規ノート-${layer}-${targetList.length}`,
-        mouseover : false,
-        editing : false,
-        selected: false,
-        children : [],
-        layer : layer,
+        mouseover :false,
+        editing   :false,
+        selected  :false,
+        children  :[],
+        layer     :layer,
+        widgetList:[],
       };
+      this.onAddWidgetCommon(note.widgetList);
       if (index == null) {
         targetList.push(note);
       } else {
@@ -73,18 +88,17 @@ export default {
       const index = targetList.indexOf(note);
       targetList.splice(index, 1);
     },
-      onSelectNote : function(targetNote) {
+    onSelectNote(targetNote) {
       // 再帰的にノートの選択状態を更新
       const updateSelectStatus = function(targetNote, noteList) {
         for (let note of noteList) {
           note.selected = (note.id === targetNote.id);
           updateSelectStatus(targetNote, note.children);
+          }
         }
-      }
-      updateSelectStatus(targetNote, this.noteList);
-      
-      // 選択中ノート情報を更新
-      this.selectedNote = targetNote;
+        updateSelectStatus(targetNote, this.noteList);
+        // 選択中ノート情報を更新
+        this.selectedNote = targetNote;
     },
     onEditNoteStart(editNote, parentNote) {
       const targetList = parentNote == null ? this.noteList : parentNote.children;
@@ -109,9 +123,42 @@ export default {
       const index = targetList.indexOf(note);
       this.onAddNoteCommon(targetList, layer, index);
     },
+    onAddWidgetCommon(targetList, layer, index) {
+      layer = layer || 1;
+      const widget = {
+        id: new Date().getTime().toString(16),
+        type: 'heading',
+        text: '',
+        mouseover: false,
+        children: [],
+        layer: layer,
+      };
+      if (index == null) {
+        targetList.push(widget);
+      } else {
+        targetList.splice(index + 1, 0, widget);
+      }  
+    },
+    onClickButtonAddWidget() {
+      this.onAddWidgetCommon(this.selectedNote.widgetList);
+    },
+    onAddChildWidget(widget) {
+      this.onAddWidgetCommon(widget.children, widget.layer + 1);
+    },
+    onAddWidgetAfter(parentWidget, note) {
+      const targetList = parentWidget == null ? this.selectedNote.widgetList : parentWidget.children;
+      const layer = parentWidget == null ? null : parentWidget.layer + 1;
+      const index = targetList.indexOf(note);
+      this.onAddWidgetCommon(targetList, layer, index);
+    },
+    onDeleteWidget(parentWidget, widget) {
+      const targetList = parentWidget == null ? this.selectedNote.widgetList : parentWidget.children;
+      const index = targetList.indexOf(widget);
+      targetList.splice(index, 1);
+    },
   },
   computed: {
-    selectedPath : function() {
+    selectedPath() {
       const searchSelectedPath = function(noteList, path) {
         for (let note of noteList) {
           const currentPath = path == null ? note.name : `${path} / ${note.name}`;
@@ -126,6 +173,7 @@ export default {
   },
   components: {
     NoteItem,
+    WidgetItem,
     draggable,
   },
 }
