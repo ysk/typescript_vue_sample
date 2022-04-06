@@ -72,34 +72,37 @@ export default {
     'parentWidget',
     'layer',
   ],
-  methods: {
-    onMouseOver : function() {
+  methods:{
+    onMouseOver(){
       this.widget.mouseover = true;
     },
-    onMouseLeave : function() {
+    onMouseLeave(){
       this.widget.mouseover = false;
     },
-    onClickDelete : function(parentWidget, widget) {
+    onClickDelete(parentWidget, widget){
       this.$emit('delete', parentWidget, widget);
     },
-    onClickChildWidget : function(widget) {
+    onClickChildWidget(widget){
       this.$emit('addChild', widget);
     },
-    onClickAddWidgetAfter : function(parentWidget, widget) {
+    onClickAddWidgetAfter(parentWidget, widget) {
       this.$emit('addWidgetAfter', parentWidget, widget);
     },
-
-   resizeCodeTextarea() {
+    resizeCodeTextarea: function() {
       if (this.widget.type !== 'code') return;
       const textarea = this.$refs[`widget-code-${this.widget.id}`];
       const promise = new Promise(function(resolve) {
         resolve(textarea.style.height = 'auto')
-      });
+        });
       promise.then(function(){
         textarea.style.height = textarea.scrollHeight + 'px'
       });
     },
-
+  },
+  watch: {
+    'widget.text': function(){
+      this.resizeCodeTextarea();
+    },
   },
 }
 </script>
