@@ -35,6 +35,7 @@
         </div>
         <div class="note-content">
           <h3 class="note-title">{{selectedNote.name}}</h3>
+          <draggable :list="selectedNote.widgetList" group="widgets">
           <WidgetItem
             v-for="widget in selectedNote.widgetList"
             :widget="widget"
@@ -44,6 +45,7 @@
             @addChild="onAddChildWidget"
             @addWidgetAfter="onAddWidgetAfter"
           />
+          </draggable>
           <button class="transparent" @click="onClickButtonAddWidget">
             <i class="fas fa-plus-square"></i>ウィジェットを追加
           </button>
@@ -138,7 +140,7 @@ export default {
       layer = layer || 1;
       const widget = {
         id: new Date().getTime().toString(16),
-        type: 'heading',
+        type: layer === 1 ? 'heading' : 'body',
         text: '',
         mouseover: false,
         children: [],
@@ -166,15 +168,20 @@ export default {
       const targetList = parentWidget == null ? this.selectedNote.widgetList : parentWidget.children;
       const index = targetList.indexOf(widget);
       targetList.splice(index, 1);
+      
+      // 削除した1つ前のウィジェットを選択状態にする
+      const focusWidget = (index === 0) ? parentWidget : targetList[index - 1];
+      if (focusWidget != null) {
+        focusWidget.id = (parseInt(focusWidget.id, 16) + 1).toString(16);
+      }
     },
     onClickButtonSave(){
-    localStorage.setItem('noteItem', JSON.stringify(this.noteList));
-    this.$toasted.show('ノートを保存しました',{
-      position: 'top-left',
-      duration: 1000,
-      type: 'success'
-    });
-    alert();
+      localStorage.setItem('noteItem', JSON.stringify(this.noteList));
+      this.$toasted.show('ノートを保存しました',{
+        position: 'top-left',
+        duration: 1000,
+        type: 'success'
+      });
     }
   },
   computed: {
