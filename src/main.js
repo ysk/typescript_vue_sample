@@ -7,6 +7,9 @@ Vue.config.productionTip = false
 import VueRouter from 'vue-router'
 Vue.use(VueRouter)
 
+import Toasted from 'vue-toasted';
+Vue.use(Toasted);
+
 const router = new VueRouter({
   mode: 'history',
   routes : [
